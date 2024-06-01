@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Chatbot</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #f3e5f5;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        margin: 0;
+      }
+      #chatbox {
+        max-width: 90%; /* Adjusted for responsiveness */
+        width: 600px;
+        background-color: #fff;
+        border-radius: 8px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+      }
+      #chatbox header {
+        background-color: #ce93d8;
+        color: white;
+        padding: 10px;
+        text-align: center;
+        font-size: 1.2em;
+      }
+      #chatlog {
+        border-top: 1px solid #ce93d8;
+        padding: 10px;
+        height: 350px;
+        overflow-y: auto;
+        background-color: #f3e5f5;
+      }
+      #chatlog p {
+        margin: 0 0 10px;
+      }
+      #userInput {
+        width: calc(100% - 42px); /* Adjusted width */
+        padding: 10px;
+        margin: 10px 20px; /* Adjusted margin */
+        border: 1px solid #ce93d8;
+        border-radius: 4px;
+        box-sizing: border-box; /* Ensures padding and border are included in the width */
+      }
+      .thisbutton {
+        background-color: #ce93d8;
+        color: white;
+        border: none;
+        padding: 10px;
+        margin: 10px 20px; /* Adjusted margin */
+        border-radius: 4px;
+        cursor: pointer;
+        width: calc(100% - 42px); /* Adjusted width */
+        box-sizing: border-box; /* Ensures padding and border are included in the width */
+      }
+      button:hover {
+        background-color: #ab47bc;
+      }
+
+      /* Media query for mobile responsiveness */
+      @media only screen and (max-width: 600px) {
+        #chatbox {
+          width: 90%;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="chatbox">
+      <header>Chatbot</header>
+      <div id="chatlog"></div>
+
+      <input
+        type="text"
+        id="userInput"
+        placeholder="Type your message here"
+        onkeydown="checkEnter(event)"
+      />
+      <button class="thisbutton" onclick="sendMessage()">Send</button>
+    </div>
+
+    <script>
+      async function sendMessage() {
+        const userInput = document.getElementById("userInput").value;
+        if (!userInput) return;
+
+        const response = await fetch("/chat", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json", //sending data in json format
+          },
+          body: JSON.stringify({ message: userInput }),
+        });
+
+        const data = await response.json();
+
+        document.getElementById(
+          "chatlog"
+        ).innerHTML += `<p><strong>User:</strong> ${userInput}</p>`;
+        console.log(data.response);
+        if (data.response?.getTestForPortal?.[0]?.html) {
+          chatResponse = data.response.getTestForPortal[0].html;
+          console.log(chatResponse);
+          //chatResponse = html.escape(chatResponse);
+        } else {
+          chatResponse = data.response;
+        }
+
+        console.log(chatResponse);
+        document.getElementById(
+          "chatlog"
+        ).innerHTML += `<p><strong>Bot:</strong> ${chatResponse}</p>`;
+        document.getElementById("userInput").value = "";
+
+        // Auto-scroll to the latest message
+        const chatlog = document.getElementById("chatlog");
+        chatlog.scrollTop = chatlog.scrollHeight;
+      }
+
+      function checkEnter(event) {
+        if (event.key === "Enter") {
+          sendMessage();
+        }
+      }
+    </script>
+  </body>
+</html>
